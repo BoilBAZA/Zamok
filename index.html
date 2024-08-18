@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lockpicking Mini-Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+        #lock {
+            width: 300px;
+            height: 300px;
+            background-color: #333333;
+            border-radius: 50%;
+            position: relative;
+        }
+        #spica {
+            width: 7.5px; /* Увеличиваем толщину спицы в 1.5 раза */
+            height: 150px;
+            background-color: #FFFFFF;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: rotate(0deg);
+            transition: background-color 0.2s ease; /* Добавляем плавный переход цвета */
+        }
+        #indicator {
+            width: 7.5px; /* Увеличиваем толщину полоски в 1.5 раза */
+            height: 150px;
+            background-color: #00FF00;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: rotate(0deg);
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        #success-word {
+            margin-top: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            display: none; /* Скрыт по умолчанию */
+        }
+        button {
+            background-color: #555555;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #777777;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lock">
+        <div id="spica"></div>
+        <div id="indicator"></div>
+    </div>
+
+    <div id="message">Попробуйте взломать замок!</div>
+    <div id="success-word">Кошка</div> <!-- Слово "Кошка", которое появляется при успехе -->
+
+    <script>
+        let spicaAngle = 0;
+        let correctAngle = Math.floor(Math.random() * 180) - 90; // Случайное правильное положение
+        let indicatorAngle = 0;
+        let hits = 0;
+        let attempts = 0;
+
+        const spica = document.getElementById('spica');
+        const indicator = document.getElementById('indicator');
+        const successWord = document.getElementById('success-word');
+        const message = document.getElementById('message');
+
+        function rotateSpica(direction) {
+            spicaAngle = direction;
+            spica.style.transform = `rotate(${spicaAngle}deg)`;
+        }
+
+        function moveIndicator() {
+            indicatorAngle += 5; // Увеличение скорости движения индикатора
+            if (indicatorAngle >= 360) {
+                indicatorAngle = 0;
+            }
+            indicator.style.transform = `rotate(${indicatorAngle}deg)`;
+        }
+
+        function tryUnlock() {
+            attempts += 1;
+
+            if (Math.abs(spicaAngle - indicatorAngle) < 10) {
+                hits += 1;
+                message.textContent = `Попадание! (${hits}/3)`;
+                if (hits >= 3) {
+                    message.textContent = "Замок открыт!";
+                    successWord.style.display = "block"; // Показываем слово "Кошка"
+                    clearInterval(indicatorInterval);
+                    document.removeEventListener('mousemove', moveOtmychka);
+                    document.removeEventListener('click', tryUnlock);
+                }
+            } else {
+                hits = 0;
+                message.textContent = "Замок не поддается, попробуйте ещё раз!";
+                spica.style.backgroundColor = '#FF0000'; // Подмигивание красным
+                setTimeout(() => {
+                    spica.style.backgroundColor = '#FFFFFF'; // Возвращаем белый цвет
+                }, 200);
+            }
+        }
+
+        function moveOtmychka(event) {
+            const rect = document.getElementById('lock').getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+
+            rotateSpica(angle);
+        }
+
+        document.addEventListener('mousemove', moveOtmychka);
+        document.addEventListener('click', tryUnlock);
+
+        const indicatorInterval = setInterval(moveIndicator, 50); // Интервал обновления индикатора
+    </script>
+
+</body>
+</html>
