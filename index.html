@@ -1,160 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lockpicking Mini-Game</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #000000;
-            color: #FFFFFF;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            overflow: hidden;
-        }
-        #lock {
-            width: 300px;
-            height: 300px;
-            background-color: #333333;
-            border-radius: 50%;
-            position: relative;
-        }
-        #spica {
-            width: 7.5px; /* Увеличиваем толщину спицы в 1.5 раза */
-            height: 150px;
-            background-color: #FFFFFF;
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            transform: rotate(0deg);
-            transition: background-color 0.2s ease; /* Добавляем плавный переход цвета */
-        }
-        .indicator {
-            width: 7.5px; /* Увеличиваем толщину полоски в 1.5 раза */
-            height: 150px;
-            background-color: #00FF00;
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-        }
-        #message {
-            margin-top: 20px;
-            font-size: 1.5em;
-        }
-        #success-word {
-            margin-top: 20px;
-            font-size: 2em;
-            font-weight: bold;
-            display: none; /* Скрыт по умолчанию */
-        }
-        button {
-            background-color: #555555;
-            color: #FFFFFF;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #777777;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Лабиринт Башни Дюны</title>
+  <style>
+    /* Общие стили */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 20px 0;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    nav ul li {
+      margin: 0 15px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    nav ul li a:hover {
+      color: #ff6600;
+    }
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    section {
+      margin-bottom: 40px;
+    }
+    section h2 {
+      border-bottom: 2px solid #ff6600;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    section h3 {
+      margin-top: 25px;
+      color: #ff6600;
+    }
+    p, ul, ol, table {
+      margin: 15px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    blockquote {
+      margin: 15px 20px;
+      padding: 10px 20px;
+      background: #eee;
+      border-left: 5px solid #ff6600;
+      font-style: italic;
+    }
+    footer {
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+    }
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      nav ul {
+        flex-direction: column;
+      }
+      nav ul li {
+        margin: 5px 0;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <div id="lock">
-        <div id="spica"></div>
-        <div id="indicator1" class="indicator"></div>
-        <div id="indicator2" class="indicator"></div>
-        <div id="indicator3" class="indicator"></div>
-    </div>
-
-    <div id="message">Попробуйте взломать замок!</div>
-    <div id="success-word">Кошка</div> <!-- Слово "Кошка", которое появляется при успехе -->
-
-    <script>
-        let spicaAngle = 0;
-        let hits = 0;
-        const totalHitsNeeded = 3;
-
-        const spica = document.getElementById('spica');
-        const indicators = [
-            {element: document.getElementById('indicator1'), angle: 0, speed: 5},
-            {element: document.getElementById('indicator2'), angle: 120, speed: -4},
-            {element: document.getElementById('indicator3'), angle: 240, speed: 6}
-        ];
-        const successWord = document.getElementById('success-word');
-        const message = document.getElementById('message');
-
-        function rotateSpica(direction) {
-            spicaAngle = direction;
-            spica.style.transform = `rotate(${spicaAngle}deg)`;
-        }
-
-        function moveIndicators() {
-            indicators.forEach(indicator => {
-                indicator.angle += indicator.speed;
-                if (indicator.angle >= 360) indicator.angle -= 360;
-                if (indicator.angle < 0) indicator.angle += 360;
-                indicator.element.style.transform = `rotate(${indicator.angle}deg)`;
-            });
-        }
-
-        function resetIndicators() {
-            hits = 0;
-            indicators.forEach(indicator => {
-                indicator.element.style.display = 'block'; // Показать все индикаторы
-            });
-        }
-
-        function tryUnlock() {
-            let hit = false;
-            indicators.forEach(indicator => {
-                if (Math.abs(spicaAngle - indicator.angle) < 10 && indicator.element.style.display !== 'none') {
-                    hit = true;
-                    indicator.element.style.display = 'none'; // Убираем индикатор при попадании
-                    hits += 1;
-                    message.textContent = `Попадание! (${hits}/${totalHitsNeeded})`;
-                }
-            });
-
-            if (hit && hits >= totalHitsNeeded) {
-                message.textContent = "Замок открыт!";
-                successWord.style.display = "block"; // Показываем слово "Кошка"
-                clearInterval(indicatorInterval);
-                document.removeEventListener('mousemove', moveOtmychka);
-                document.removeEventListener('click', tryUnlock);
-            } else if (!hit) {
-                message.textContent = "Замок не поддается, попробуйте ещё раз!";
-                spica.style.backgroundColor = '#FF0000'; // Подмигивание красным
-                setTimeout(() => {
-                    spica.style.backgroundColor = '#FFFFFF'; // Возвращаем белый цвет
-                    resetIndicators(); // Сбрасываем состояние игры
-                }, 200);
-            }
-        }
-
-        function moveOtmychka(event) {
-            const rect = document.getElementById('lock').getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
-
-            rotateSpica(angle);
-        }
-
-        document.addEventListener('mousemove', moveOtmychka);
-        document.addEventListener('click', tryUnlock);
-
-        const indicatorInterval = setInterval(moveIndicators, 50); // Интервал обновления индикаторов
-    </script>
-
+  <header>
+    <h1>Лабиринт Башни Дюны</h1>
+    <nav>
+      <ul>
+        <li><a href="#concept">Концепция</a></li>
+        <li><a href="#mechanics">Механики</a></li>
+        <li><a href="#buttons">Кнопки</a></li>
+        <li><a href="#puzzles">Проверки</a></li>
+        <li><a href="#minigames">Мини-игры</a></li>
+        <li><a href="#final">Финал</a></li>
+        <li><a href="#conclusion">Заключение</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <!-- Концепция -->
+    <section id="concept">
+      <h2>Концепция мини-игры "Лабиринт Башни Дюны"</h2>
+      <p>
+        Игроки выбирают <strong>свой персонаж</strong>, который <strong>спаунится в лабиринте</strong> на <strong>стартовой позиции</strong>.
+        Они <strong>движутся по клеткам</strong>, где их ждут <strong>препятствия, загадки и ловушки</strong>.
+      </p>
+    </section>
+    <!-- Основные механики -->
+    <section id="mechanics">
+      <h2>1. Основные механики</h2>
+      <ul>
+        <li>
+          <strong>Каждый персонаж имеет свой радиус перемещения:</strong>
+          <ul>
+            <li><strong>Вахаиб</strong> (Абатур) – 6 клеток за ход.</li>
+            <li><strong>Гнилион</strong> (Харуман) – 8 клеток за ход.</li>
+            <li><strong>Офилнекр</strong> (Гриша) – 5 клеток за ход.</li>
+            <li><strong>Залупатор</strong> – 5 клеток за ход.</li>
+          </ul>
+        </li>
+        <li>Игроки ходят по очереди, выбирая направление (вверх, вниз, влево, вправо).</li>
+        <li>На некоторых клетках расположены особые точки (миниквесты, загадки, проверки).</li>
+        <li>Цель – достичь центра лабиринта, где ждёт финальная битва.</li>
+      </ul>
+    </section>
+    <!-- Игровые кнопки -->
+    <section id="buttons">
+      <h2>2. Игровые кнопки (взаимодействия)</h2>
+      <p>
+        В определённых местах лабиринта игроки натыкаются на триггеры, которые активируют мини-игру.
+      </p>
+      <h3>Варианты кнопок в интерфейсе:</h3>
+      <ol>
+        <li>[Открыть дверь] – требует решения загадки (кодовый замок, символы, математическая головоломка).</li>
+        <li>[Активировать механизм] – проверка ловкости или силы (реакция, мини-игра на тайминг).</li>
+        <li>[Перебраться через преграду] – требует определённого навыка (например, если Гнилион выбрал "сгибаемость", он проходит без проверки).</li>
+        <li>[Обойти ловушку] – проверка внимательности (правильный выбор).</li>
+        <li>[Сразиться с врагом] – небольшая боевая мини-игра (быстрая реакция).</li>
+      </ol>
+    </section>
+    <!-- Загадки и проверки -->
+    <section id="puzzles">
+      <h2>3. Распределение загадок и проверок в лабиринте</h2>
+      <p>
+        Каждый из важных коридоров содержит мини-игру, без прохождения которой нельзя двигаться дальше.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Локация</th>
+            <th>Вид проверки</th>
+            <th>Способ прохождения</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>Запертые ворота</strong></td>
+            <td><strong>Кодовая загадка</strong></td>
+            <td>Ввести правильную последовательность</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Обвалившийся коридор</strong></td>
+            <td><strong>Проверка силы/ловкости</strong></td>
+            <td>Перепрыгнуть или убрать завал</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Оптический коридор</strong></td>
+            <td><strong>Лабиринт теней</strong></td>
+            <td>Выбрать правильную траекторию</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Песчаная ловушка</strong></td>
+            <td><strong>Выживание (тайминг)</strong></td>
+            <td>Быстро выбраться до полного засыпания</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Капсула с мутантом</strong></td>
+            <td><strong>Выбор: освободить или уничтожить</strong></td>
+            <td>Открывает новый путь или создает угрозу</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>Тайный проход (за дверью)</strong></td>
+            <td><strong>Комбинация кнопок</strong></td>
+            <td>Найти правильную последовательность</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <!-- Примеры мини-игр -->
+    <section id="minigames">
+      <h2>4. Примеры мини-игр</h2>
+      <article>
+        <h3>🔢 Кодовый замок (Запертые ворота)</h3>
+        <ul>
+          <li>Панель с четырьмя кнопками с цифрами (1, 2, 3, 4).</li>
+          <li>Подсказка: "В пустыне выживает тот, кто следует пути стихий."</li>
+          <li>Игрок должен ввести последовательность: <em>Песок → Ветер → Вода → Солнце</em>.</li>
+          <li>При правильном ответе дверь открывается, а при ошибке включается тревога и появляются 2 стражника.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>🏃 Проверка ловкости (Обвалившийся коридор)</h3>
+        <ul>
+          <li>Запускается анимация обвала.</li>
+          <li>Игрок должен нажать кнопку "Перепрыгнуть" в нужный момент (реакция на таймер).</li>
+          <li>Если игрок успевает – он проходит дальше, иначе получает 2D6 урона и остаётся в завале.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>🔦 Лабиринт теней (Оптический коридор)</h3>
+        <ul>
+          <li>Экран затемняется, остаются только силуэты трёх дверей.</li>
+          <li>Подсказка: "Иди туда, где нет света, но есть путь."</li>
+          <li>Игрок выбирает дверь: при правильном выборе – проходит дальше, при ошибке – получает урон и отбрасывается назад.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>⏳ Песчаная ловушка (Выживание)</h3>
+        <ul>
+          <li>Игрок начинает тонуть в песке.</li>
+          <li>На экране появляются три кнопки: "Двигаться быстро", "Расслабиться и замереть", "Применить предмет (крюк/верёвку)".</li>
+          <li>Только один из вариантов является правильным – при ошибке игрок теряет 1 ход и получает урон.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>🧬 Капсула с мутантом (Выбор судьбы)</h3>
+        <ul>
+          <li>Игроки находят огромный контейнер с существом внутри.</li>
+          <li>Надпись: "Объект: Дельта-7. Уничтожить? Освободить?"</li>
+          <li>Варианты: 
+            <ul>
+              <li><strong>Открыть капсулу</strong> – существо может напасть, но также помочь в финальной битве.</li>
+              <li><strong>Заблокировать</strong> – продолжить движение без изменения событий.</li>
+            </ul>
+          </li>
+          <li>Выбор влияет на исход финального боя с офицером.</li>
+        </ul>
+      </article>
+    </section>
+    <!-- Финальная точка -->
+    <section id="final">
+      <h2>5. Финальная точка: Вход в Зал Садора Крайвиса</h2>
+      <p>
+        После всех испытаний игроки доходят до центра лабиринта. Перед ними финальная дверь с загадкой:
+      </p>
+      <blockquote>
+        "Тот, кто правит пустыней, не оставляет следов. Тот, кто жаждет крови, оставляет лишь пыль."
+      </blockquote>
+      <p>Выбор:</p>
+      <ol>
+        <li>Выбрать "Ветер" – дверь открывается.</li>
+        <li>Выбрать "Кровь" – ловушка с атакой лазеров.</li>
+      </ol>
+      <p>После чего начинается финальный бой.</p>
+    </section>
+    <!-- Заключение -->
+    <section id="conclusion">
+      <h2>Финальное слово гейм-мастера</h2>
+      <blockquote>
+        "Вы преодолели ловушки и секреты Башни Дюны. Теперь перед вами последний шаг – сразиться с тем, кто правит этим адом. Садор уже ждал вас. Теперь – либо вы его, либо он вас."
+      </blockquote>
+      <h2>Заключение</h2>
+      <p>
+        Этот лабиринт превращает прохождение в командное испытание:
+      </p>
+      <ul>
+        <li>Игроки могут координировать свои действия: кто идёт первым, а кто решает загадки.</li>
+        <li>Каждый персонаж уникален – Вахаиб двигается дальше всех, Гнилион находит обходные пути, Гриша взаимодействует с биоматериалами, а Залупатор просто ломает всё на своём пути.</li>
+      </ul>
+      <p>
+        Мини-игра будет доступна на сайте, где игроки смогут двигаться по клеткам, решать загадки и достигать финального зала.
+      </p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2025 Лабиринт Башни Дюны. Все права защищены.</p>
+  </footer>
 </body>
 </html>
